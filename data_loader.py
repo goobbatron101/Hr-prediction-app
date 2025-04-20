@@ -1,3 +1,4 @@
+print(">>> Running data_loader.py...")
 import pandas as pd
 from pybaseball import batting_stats, pitching_stats
 import numpy as np
