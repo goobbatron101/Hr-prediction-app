@@ -9,10 +9,6 @@ st.title("Daily Home Run Predictions")
 if st.button("Refresh Predictions"):
     data = load_batter_features()
     predictions = predict_home_runs(data)
-    st.dataframe(
-        predictions.style
-        .format({"HR_Probability": "{:.2%}"})
-        .highlight_max('HR_Probability')
-    )
+st.dataframe(predictions)
 else:
     st.info("Click the button above to load today's predictions.")
