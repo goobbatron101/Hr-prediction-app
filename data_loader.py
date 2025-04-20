@@ -10,7 +10,10 @@ from pybaseball import batting_stats, pitching_stats
 # ----------------------------------
 def load_batter_features():
     try:
-        print(">>> Loading batters...")
+        print(">>> loading batters...")
+        from pybaseball import batting_stats
+        import numpy as np
+
         df = batting_stats(2024, qual=20)
 
         df = df.rename(columns={
@@ -27,19 +30,19 @@ def load_batter_features():
         df = df[['player', 'slg', 'iso', 'hr_fb', 'bb_rate', 'k_rate', 'pa', 'hr']]
         df.dropna(inplace=True)
 
-        # Add simulated park/weather values
         df['park_factor'] = np.random.normal(1.0, 0.1, len(df))
         df['wind'] = np.random.normal(5, 3, len(df))
         df['temperature'] = np.random.normal(75, 10, len(df))
         df['humidity'] = np.random.normal(50, 15, len(df))
-print(">>> FINAL batters df shape:", df.shape)
-        print(">>> Batters loaded:", len(df))
-        return df.reset_index(drop=True)
+
+        print(">>> loaded batters:", len(df))
+        return df
 
     except Exception as e:
-        print(">>> ERROR loading batters:", e)
+        import traceback
+        print(">>> ERROR loading batters:")
         traceback.print_exc()
-        return pd.DataFrame()
+        raise e  # Force the error to crash and print logs
 
 # ----------------------------------
 # Load Pitchers
