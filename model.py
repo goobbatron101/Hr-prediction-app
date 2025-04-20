@@ -69,6 +69,7 @@ def predict_home_runs(df_input):
         labels=["Fade", "Watchlist", "Positive EV Bet"]
     )
 
-    return df_combined[['player', 'pitcher', 'HR_Probability', 'Recommendation']].sort_values(
-        by='HR_Probability', ascending=False
-    )
+    return df_combined[
+        ['player', 'pitcher', 'HR_Probability', 'Recommendation',
+         'park_factor', 'wind', 'temperature', 'humidity']
+    ].sort_values(by='HR_Probability', ascending=False)
