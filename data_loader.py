@@ -9,7 +9,13 @@ def load_batter_features():
     try:
         print(">>> Loading batters...")
         df = batting_stats(2024, qual=20)
+import numpy as np
 
+# Simulate environmental context
+df['park_factor'] = np.random.normal(loc=1.0, scale=0.1, size=len(df))          # around league average
+df['wind'] = np.random.normal(loc=5, scale=3, size=len(df))                     # 5 mph avg
+df['temperature'] = np.random.normal(loc=75, scale=10, size=len(df))            # degrees F
+df['humidity'] = np.random.normal(loc=50, scale=15, size=len(df))               # percentage
         df = df.rename(columns={
             'Name': 'player',
             'SLG': 'slg',
