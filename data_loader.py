@@ -82,7 +82,7 @@ def get_today_matchups():
         teams = soup.find_all("div", class_="lineup is-expected")
 
         for team in teams:
-            pitcher_tag = team.find("div", class_="lineup__note")
+            pitcher_tag = team.find("span", class_="lineup__note")
             if not pitcher_tag:
                 continue
             pitcher = pitcher_tag.text.strip().replace("Probable Pitcher: ", "").split(" ")[0:2]
