@@ -26,17 +26,17 @@ df = pd.concat([batters.reset_index(drop=True), pitcher_sample], axis=1)
 # Create binary target
 df['target'] = (df['hr'] >= 1).astype(int)
 
-# Select features
-features = [
-    'slg', 'iso', 'hr_fb', 'bb_rate', 'k_rate', 'pa',    # Hitter
-    'era', 'fip', 'hr9', 'k_rate_p', 'bb_rate_p'          # Pitcher (renamed below)
-]
-
-# Rename pitcher columns to avoid overlap with hitter columns
+# Rename pitcher columns to avoid overlap
 df = df.rename(columns={
     'k_rate': 'k_rate_p',
     'bb_rate': 'bb_rate_p'
 })
+
+# Now define your feature list
+features = [
+    'slg', 'iso', 'hr_fb', 'bb_rate', 'k_rate', 'pa',    # Hitter
+    'era', 'fip', 'hr9', 'k_rate_p', 'bb_rate_p'          # Pitcher
+]
 
 # Drop rows with missing values
 df = df.dropna(subset=features + ['target'])
