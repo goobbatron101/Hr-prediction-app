@@ -1,5 +1,3 @@
-print(">>> model.py loaded (safe fallback version)")
-
 import pandas as pd
 
 def predict_home_runs(df_input=None):
@@ -21,8 +19,9 @@ def predict_home_runs(df_input=None):
         tb = traceback.format_exc()
         print(">>> ERROR in predict_home_runs:")
         print(tb)
+
+        # Return error as a visible table
         return pd.DataFrame({
-            "error": ["Something went wrong in predict_home_runs()"],
-            "details": [str(e)],
-            "trace": [tb]
+            "Error": ["Something went wrong"],
+            "Traceback": [tb]
         })
