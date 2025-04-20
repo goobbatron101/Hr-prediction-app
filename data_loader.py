@@ -56,7 +56,34 @@ def load_pitcher_features():
             'K%': 'k_rate',
             'BB%': 'bb_rate'
         })
+# 1. Rename pitcher stats to avoid conflict
+df = df.rename(columns={
+    'k_rate': 'k_rate_p',
+    'bb_rate': 'bb_rate_p'
+})
 
+# 2. Define full list of features (including weather & park)
+full_features = [
+    'slg', 'iso', 'hr_fb', 'bb_rate', 'k_rate', 'pa',
+    'era', 'fip', 'hr9', 'k_rate_p', 'bb_rate_p',
+    'park_factor', 'wind', 'temperature', 'humidity'
+]
+
+# 3. Create binary target
+df['target'] = (df['hr'] >= 1).astype(int)
+
+# 4. Drop any rows missing required features
+features = [f for f in full_features if f in df.columns]
+df = df.dropna(subset=features + ['target'])
+
+# 5. Train the model
+X = df[features]
+y = df['target']
+scaler = StandardScaler()
+X_scaled = scaler.fit_transform(X)
+
+model = LogisticRegression(class_weight='balanced', max_iter=1000)
+model.fit(X_scaled, y)
         df = df[['pitcher', 'era', 'fip', 'hr9', 'k_rate', 'bb_rate']]
         df.dropna(inplace=True)
 
