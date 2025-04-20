@@ -5,3 +5,5 @@ xgboost
 requests
 pybaseball
 xgboost
+beautifulsoup4
+requests
