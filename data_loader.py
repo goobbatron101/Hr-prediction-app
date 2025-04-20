@@ -32,7 +32,7 @@ def load_batter_features():
         df['wind'] = np.random.normal(5, 3, len(df))
         df['temperature'] = np.random.normal(75, 10, len(df))
         df['humidity'] = np.random.normal(50, 15, len(df))
-
+print(">>> FINAL batters df shape:", df.shape)
         print(">>> Batters loaded:", len(df))
         return df.reset_index(drop=True)
 
@@ -103,7 +103,7 @@ def get_today_matchups():
         matchup_df = pd.DataFrame(matchups)
         print(">>> Matchups preview:")
         print(matchup_df.head())
-
+print(">>> FINAL matchups df shape:", matchup_df.shape)
         return matchup_df
 
     except Exception as e:
