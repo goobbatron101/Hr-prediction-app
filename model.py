@@ -1,10 +1,20 @@
 print(">>> Importing model.py...")
 
-import pandas as pd
-from data_loader import load_batter_features, get_today_matchups
+try:
+    import pandas as pd
+    from data_loader import (
+        load_batter_features,
+        get_today_matchups
+    )
+except Exception as e:
+    import traceback
+    print(">>> ERROR in model.py during import:")
+    traceback.print_exc()
+    raise e
 
 def predict_home_runs(df_input=None):
-    print(">>> Loading batters and real matchups...")
+    print(">>> Model loaded — basic test output")
+    return pd.DataFrame({"player": ["Test"], "HR_Probability": [0.5]})
     
     batters = load_batter_features()
     matchups = get_today_matchups()
