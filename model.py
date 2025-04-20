@@ -47,32 +47,33 @@ X_scaled = scaler.fit_transform(X)
 model = LogisticRegression(class_weight='balanced', max_iter=1000)
 model.fit(X_scaled, y)
 
-# Prediction function
 def predict_home_runs(df_input):
-    # Ensure environmental features are in the input
+    import numpy as np
+
+    # Simulate weather & park if not present
     if 'park_factor' not in df_input.columns:
-        import numpy as np
         df_input['park_factor'] = np.random.normal(1.0, 0.1, len(df_input))
         df_input['wind'] = np.random.normal(5, 3, len(df_input))
         df_input['temperature'] = np.random.normal(75, 10, len(df_input))
         df_input['humidity'] = np.random.normal(50, 15, len(df_input))
 
-    # Assign pitcher
+    # Assign random pitchers
     pitcher_input = pitchers.sample(n=len(df_input), replace=True).reset_index(drop=True)
     df_input = df_input.reset_index(drop=True)
     df_combined = pd.concat([df_input, pitcher_input], axis=1)
 
-    # Rename pitcher columns
+    # Rename pitcher stats
     df_combined = df_combined.rename(columns={
         'k_rate': 'k_rate_p',
         'bb_rate': 'bb_rate_p'
     })
 
-    # Prediction
+    # Make predictions
     X_pred = df_combined[features]
     X_scaled_pred = scaler.transform(X_pred)
     probs = model.predict_proba(X_scaled_pred)[:, 1]
 
+    # Add results
     df_combined['HR_Probability'] = probs
     df_combined['Recommendation'] = pd.cut(
         probs,
@@ -80,7 +81,8 @@ def predict_home_runs(df_input):
         labels=["Fade", "Watchlist", "Positive EV Bet"]
     )
 
-    return df_combined[
-        ['player', 'pitcher', 'HR_Probability', 'Recommendation',
-         'park_factor', 'wind', 'temperature', 'humidity']
-    ].sort_values(by='HR_Probability', ascending=False)
+    # Return all relevant columns
+    return df_combined[[
+        'player', 'pitcher', 'HR_Probability', 'Recommendation',
+        'park_factor', 'wind', 'temperature', 'humidity'
+    ]].sort_values(by='HR_Probability', ascending=False)
