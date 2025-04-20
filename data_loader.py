@@ -66,3 +66,36 @@ def load_pitcher_features():
         print(">>> ERROR loading pitchers:", e)
         traceback.print_exc()
         return pd.DataFrame()
+import requests
+from bs4 import BeautifulSoup
+
+def get_today_matchups():
+    try:
+        print(">>> Scraping Rotowire daily lineups...")
+
+        url = "https://www.rotowire.com/baseball/daily-lineups.php"
+        response = requests.get(url)
+        soup = BeautifulSoup(response.text, 'html.parser')
+
+        matchups = []
+
+        teams = soup.find_all("div", class_="lineup is-expected")
+
+        for team in teams:
+            pitcher_tag = team.find("div", class_="lineup__note")
+            if not pitcher_tag:
+                continue
+            pitcher = pitcher_tag.text.strip().replace("Probable Pitcher: ", "").split(" ")[0:2]
+            pitcher_name = " ".join(pitcher)
+
+            batters = team.find_all("div", class_="lineup__player")
+            for b in batters:
+                batter_name = b.text.strip().split(" ")[0:2]
+                batter_name = " ".join(batter_name)
+                matchups.append({"player": batter_name, "pitcher": pitcher_name})
+
+        return pd.DataFrame(matchups)
+
+    except Exception as e:
+        print(">>> ERROR scraping matchups:", e)
+        return pd.DataFrame(columns=['player', 'pitcher'])
