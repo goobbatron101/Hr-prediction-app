@@ -1,3 +1,18 @@
+print(">>> Importing model.py...")
+
+try:
+    from xgboost import XGBClassifier
+    from sklearn.preprocessing import StandardScaler
+    from data_loader import (
+        load_batter_features,
+        load_pitcher_features,
+        get_today_matchups
+    )
+except Exception as e:
+    import traceback
+    print(">>> ERROR during import in model.py:")
+    traceback.print_exc()
+    raise e
 import pandas as pd
 import numpy as np
 from xgboost import XGBClassifier
