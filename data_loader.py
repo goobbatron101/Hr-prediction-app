@@ -5,14 +5,12 @@ import requests
 from bs4 import BeautifulSoup
 from pybaseball import batting_stats, pitching_stats
 
-# ----------------------------------
-# Load Batters with Simulated Weather & Park
-# ----------------------------------
 def load_batter_features():
     try:
         print(">>> loading batters...")
         from pybaseball import batting_stats
         import numpy as np
+        import pandas as pd
 
         df = batting_stats(2024, qual=20)
 
@@ -40,10 +38,14 @@ def load_batter_features():
 
     except Exception as e:
         import traceback
-        print(">>> ERROR loading batters:")
-        traceback.print_exc()
-        raise e  # Force the error to crash and print logs
+        tb = traceback.format_exc()
 
+        # Save to CSV as a visible crash marker
+        pd.DataFrame({"error": [str(e)], "traceback": [tb]}).to_csv("error_log.csv", index=False)
+
+        print(">>> ERROR loading batters:")
+        print(tb)
+        raise e
 # ----------------------------------
 # Load Pitchers
 # ----------------------------------
