@@ -49,15 +49,26 @@ model.fit(X_scaled, y)
 
 # Prediction function
 def predict_home_runs(df_input):
+    # Ensure environmental features are in the input
+    if 'park_factor' not in df_input.columns:
+        import numpy as np
+        df_input['park_factor'] = np.random.normal(1.0, 0.1, len(df_input))
+        df_input['wind'] = np.random.normal(5, 3, len(df_input))
+        df_input['temperature'] = np.random.normal(75, 10, len(df_input))
+        df_input['humidity'] = np.random.normal(50, 15, len(df_input))
+
+    # Assign pitcher
     pitcher_input = pitchers.sample(n=len(df_input), replace=True).reset_index(drop=True)
     df_input = df_input.reset_index(drop=True)
     df_combined = pd.concat([df_input, pitcher_input], axis=1)
 
+    # Rename pitcher columns
     df_combined = df_combined.rename(columns={
         'k_rate': 'k_rate_p',
         'bb_rate': 'bb_rate_p'
     })
 
+    # Prediction
     X_pred = df_combined[features]
     X_scaled_pred = scaler.transform(X_pred)
     probs = model.predict_proba(X_scaled_pred)[:, 1]
