@@ -18,6 +18,11 @@ def predict_home_runs(df_input=None):
 
     except Exception as e:
         import traceback
+        tb = traceback.format_exc()
         print(">>> ERROR in predict_home_runs:")
-        traceback.print_exc()
-        return pd.DataFrame({"error": ["Something went wrong in predict_home_runs()"]})
+        print(tb)
+        return pd.DataFrame({
+            "error": ["Something went wrong in predict_home_runs()"],
+            "details": [str(e)],
+            "trace": [tb]
+        })
