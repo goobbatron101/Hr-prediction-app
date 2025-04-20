@@ -15,5 +15,6 @@ def predict_home_runs(df_input=None):
 
     # Merge real matchups with batter data
     df = pd.merge(batters, matchups, on='player', how='inner')
-
+print(">>> Matchups preview:")
+print(matchups[:5])
     return df[['player', 'pitcher', 'slg', 'iso', 'hr_fb', 'bb_rate', 'k_rate', 'pa', 'hr']]
