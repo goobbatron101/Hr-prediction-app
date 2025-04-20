@@ -27,7 +27,9 @@ def load_batter_features():
         return df.reset_index(drop=True)
 
     except Exception as e:
-        print("Error loading data:", e)
-        return pd.DataFrame(columns=[
-            'player', 'slg', 'iso', 'hr_fb', 'bb_rate', 'k_rate', 'pa', 'hr'
-        ])
+    import traceback
+    print("Error loading data:", e)
+    traceback.print_exc()
+    return pd.DataFrame(columns=[
+        'player', 'slg', 'iso', 'hr_fb', 'bb_rate', 'k_rate', 'pa', 'hr'
+    ])
