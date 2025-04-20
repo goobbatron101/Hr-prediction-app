@@ -1,12 +1,16 @@
 from pybaseball import batting_stats
 import pandas as pd
 import traceback
-
+print(">>> Running data_loader.py")
 def load_batter_features():
     try:
         # Pull 2024 season batter stats
         df = batting_stats(2024, qual=20)
+print(">>> Loading batters...")
+# (inside load_batter_features)
 
+print(">>> Loading pitchers...")
+# (inside load_pitcher_features)
         # Select and rename key features
         df = df.rename(columns={
             'Name': 'player',
@@ -32,7 +36,11 @@ def load_pitcher_features():
     try:
         # Load pitcher stats for 2024 season
         df = pitching_stats(2024, qual=20)
+print(">>> Loading batters...")
+# (inside load_batter_features)
 
+print(">>> Loading pitchers...")
+# (inside load_pitcher_features)
         # Select relevant columns and rename for consistency
         df = df.rename(columns={
             'Name': 'pitcher',
