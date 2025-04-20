@@ -51,9 +51,16 @@ def predict_home_runs(df_input):
     df_input['temperature'] = np.random.normal(75, 10, len(df_input))
     df_input['humidity'] = np.random.normal(50, 15, len(df_input))
 
-    # Assign random pitchers
-    pitcher_input = pitchers.sample(n=len(df_input), replace=True).reset_index(drop=True)
-    df_combined = pd.concat([df_input.reset_index(drop=True), pitcher_input], axis=1)
+from data_loader import get_today_matchups
+
+# Get real matchups
+matchups = get_today_matchups()
+
+# Merge real pitcher names into batter data
+df_combined = pd.merge(df_input, matchups, on='player', how='inner')
+
+# Merge in pitcher stats
+df_combined = pd.merge(df_combined, pitchers, on='pitcher', how='left')
 
     # Rename pitcher stats
     df_combined = df_combined.rename(columns={
