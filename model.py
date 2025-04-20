@@ -56,6 +56,14 @@ from data_loader import get_today_matchups
 # Get real matchups
 matchups = get_today_matchups()
 
+if matchups.empty:
+    print(">>> No matchups loaded, using fallback predictions.")
+    return pd.DataFrame(columns=['player', 'pitcher', 'HR_Probability', 'Recommendation'])
+
+# Merge matchup and pitcher data
+df_combined = pd.merge(df_input, matchups, on='player', how='inner')
+df_combined = pd.merge(df_combined, pitchers, on='pitcher', how='left')
+
 # Merge real pitcher names into batter data
 df_combined = pd.merge(df_input, matchups, on='player', how='inner')
 
