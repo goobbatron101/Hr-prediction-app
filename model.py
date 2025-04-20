@@ -22,15 +22,21 @@ df = df.rename(columns={
 # Target: 1 if HR ≥ 1
 df['target'] = (df['hr'] >= 1).astype(int)
 
-# Now define valid columns
-features = [
+# Rename pitcher stats
+df = df.rename(columns={
+    'k_rate': 'k_rate_p',
+    'bb_rate': 'bb_rate_p'
+})
+
+# Full intended feature list
+full_features = [
     'slg', 'iso', 'hr_fb', 'bb_rate', 'k_rate', 'pa',
     'era', 'fip', 'hr9', 'k_rate_p', 'bb_rate_p'
 ]
 
-# Check which features actually exist in the dataframe
-available = [col for col in features + ['target'] if col in df.columns]
-df = df.dropna(subset=available)
+# Use only features that exist in the actual DataFrame
+features = [f for f in full_features if f in df.columns]
+df = df.dropna(subset=features + ['target'])
 
 # Train model
 X = df[features]
