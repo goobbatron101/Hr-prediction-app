@@ -9,7 +9,7 @@ if st.button("Refresh Predictions"):
         df = predict_home_runs()
         st.write(">>> Done.")
 
-        # Step 3: Filters
+        # Filters
         min_iso = st.slider("Minimum ISO", 0.1, 0.6, 0.2)
         min_hr = st.slider("Minimum HR", 0, 30, 5)
         df = df[(df["iso"] >= min_iso) & (df["hr"] >= min_hr)]
@@ -33,8 +33,8 @@ if st.button("Refresh Predictions"):
 
         st.write("### Recommended HR Targets")
         st.dataframe(styled, use_container_width=True)
-        
-        except Exception as e:
+
+    except Exception as e:
         import traceback
         st.error("Something went wrong.")
         st.text(traceback.format_exc())
