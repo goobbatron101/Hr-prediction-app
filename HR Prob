@@ -1,0 +1,68 @@
+import streamlit as st
+from model import predict_home_runs
+import pandas as pd
+
+st.title("Gooby's HR Prediction App")
+
+if st.button("Refresh Predictions"):
+    st.write(">>> Getting predictions...")
+
+    try:
+        df = predict_home_runs()
+        st.write(">>> Done.")
+
+        # Step 1: Filters
+        min_iso = st.slider("Minimum ISO", 0.1, 0.6, 0.2)
+        min_hr = st.slider("Minimum HR", 0, 30, 5)
+        df = df[(df["iso"] >= min_iso) & (df["hr"] >= min_hr)]
+
+        # Step 2: Tier Recommendation
+        def recommend_tier(row):
+            if row['iso'] >= 0.3 and row['hr'] >= 10:
+                return "Bet"
+            elif row['iso'] >= 0.2 and row['hr'] >= 5:
+                return "Watch"
+            else:
+                return "Fade"
+
+        df["Recommendation"] = df.apply(recommend_tier, axis=1)
+
+        # Step 3: Rename columns for display
+        df_sorted = df.sort_values(by='hr', ascending=False).reset_index(drop=True)
+        df_sorted = df_sorted.rename(columns={
+            "player": "Player",
+            "team": "Team",
+            "pitcher": "Opposing Pitcher",
+            "slg": "SLG",
+            "iso": "ISO",
+            "hr": "HR",
+            "hr_prob": "HR Probability",
+            "Recommendation": "Tier"
+        })
+
+        # Step 4: Tier highlighting function
+        def highlight_tier(val):
+            color = {
+                "Bet": "#c6f5c6",     # green
+                "Watch": "#fffac8",   # yellow
+                "Fade": "#f5c6c6"     # red
+            }.get(val, "white")
+            return f"background-color: {color}"
+
+        # Step 5: Apply styling
+        styled = df_sorted.style\
+            .bar(subset=["SLG", "ISO", "HR Probability"], color="#FFA07A")\
+            .highlight_max(subset=["HR"], color="#90ee90")\
+            .applymap(highlight_tier, subset=["Tier"])\
+            .set_properties(**{"text-align": "left"})
+
+        st.write("### Recommended HR Targets")
+        st.dataframe(styled, use_container_width=True)
+
+    except Exception as e:
+        import traceback
+        st.error("Something went wrong.")
+        st.text(traceback.format_exc())
+
+else:
+    st.info("Click 'Refresh Predictions' to see today's top HR targets.")
