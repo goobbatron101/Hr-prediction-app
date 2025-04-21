@@ -33,6 +33,7 @@ if st.button("Refresh Predictions"):
 
         st.write("### Recommended HR Targets")
         st.dataframe(styled, use_container_width=True)
+        
         except Exception as e:
         import traceback
         st.error("Something went wrong.")
