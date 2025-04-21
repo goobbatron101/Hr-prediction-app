@@ -1,21 +1,32 @@
 import pandas as pd
+import numpy as np
 
 def predict_home_runs(df_input=None):
     try:
         print(">>> Running predict_home_runs...")
 
-        from data_loader import get_today_matchups
+        from data_loader import load_batter_features, get_today_matchups
 
+        batters = load_batter_features()
         matchups = get_today_matchups()
 
-        print(">>> Matchups DataFrame:")
-        print(matchups.head(10))
+        if batters.empty or matchups.empty:
+            print(">>> No data available.")
+            return pd.DataFrame({"player": ["No data"], "pitcher": [None]})
 
-        if matchups.empty:
-            print(">>> No matchups found.")
-            return pd.DataFrame({"message": ["No matchups returned"]})
+        # Assign 50% of batters to each matchup team
+        teams = matchups['team'].unique().tolist()
+        if len(teams) < 2:
+            print(">>> Not enough teams to assign.")
+            return pd.DataFrame({"player": ["Fallback team match failed"], "pitcher": [None]})
 
-        return matchups[['team', 'pitcher']].head(10)
+        batters = batters.head(20)  # just 20 batters to test
+        batters['team'] = np.random.choice(teams, size=len(batters))
+
+        # Merge batters with matchup pitchers by team
+        df = pd.merge(batters, matchups, on='team', how='left')
+
+        return df[['player', 'team', 'pitcher', 'slg', 'iso', 'hr']]
 
     except Exception as e:
         import traceback
@@ -23,6 +34,7 @@ def predict_home_runs(df_input=None):
         print(">>> ERROR in predict_home_runs:")
         print(tb)
         return pd.DataFrame({
-            "message": ["Error occurred"],
-            "traceback": [tb]
+            "player": ["Error occurred"],
+            "pitcher": [None],
+            "team": [None]
         })
