@@ -6,47 +6,55 @@ import requests
 from bs4 import BeautifulSoup
 from pybaseball import batting_stats, pitching_stats
 
-def load_batter_features():
+import pandas as pd
+import requests
+
+def load_batter_features(season=2025, min_pa=20):
+    print(">>> Fetching 2025 batter stats from MLB Stats API...")
+
+    # MLB Stats API endpoint for batter stats
+    url = (
+        f"https://statsapi.mlb.com/api/v1/stats"
+        f"?stats=season&group=hitting&season={season}&gameType=R&limit=10000"
+    )
+
     try:
-        print(">>> loading batters...")
-        from pybaseball import batting_stats
-        import numpy as np
-        import pandas as pd
+        response = requests.get(url)
+        data = response.json()
 
-        df = batting_stats(2024, qual=20)
+        rows = []
+        for player in data.get("stats", [])[0].get("splits", []):
+            person = player["player"]
+            stat = player["stat"]
+            team = player.get("team", {}).get("name", "Unknown")
 
-        df = df.rename(columns={
-            'Name': 'player',
-            'SLG': 'slg',
-            'ISO': 'iso',
-            'HR/FB': 'hr_fb',
-            'BB%': 'bb_rate',
-            'K%': 'k_rate',
-            'PA': 'pa',
-            'HR': 'hr'
-        })
+            # Filter by min plate appearances
+            pa = int(stat.get("plateAppearances", 0))
+            if pa < min_pa:
+                continue
 
-        df = df[['player', 'slg', 'iso', 'hr_fb', 'bb_rate', 'k_rate', 'pa', 'hr']]
-        df.dropna(inplace=True)
+            # Calculate ISO = SLG - AVG
+            avg = float(stat.get("avg", 0))
+            slg = float(stat.get("sluggingPercentage", 0))
+            iso = round(slg - avg, 3)
 
-        df['park_factor'] = np.random.normal(1.0, 0.1, len(df))
-        df['wind'] = np.random.normal(5, 3, len(df))
-        df['temperature'] = np.random.normal(75, 10, len(df))
-        df['humidity'] = np.random.normal(50, 15, len(df))
+            rows.append({
+                "player": person["fullName"],
+                "team": team,
+                "slg": slg,
+                "iso": iso,
+                "hr": int(stat.get("homeRuns", 0)),
+            })
 
-        print(">>> loaded batters:", len(df))
+        df = pd.DataFrame(rows)
+        print(f">>> Loaded {len(df)} batters from MLB Stats API.")
         return df
 
     except Exception as e:
+        print(">>> Failed to load batter stats.")
         import traceback
-        tb = traceback.format_exc()
-
-        # Save to CSV as a visible crash marker
-        pd.DataFrame({"error": [str(e)], "traceback": [tb]}).to_csv("error_log.csv", index=False)
-
-        print(">>> ERROR loading batters:")
-        print(tb)
-        raise e
+        print(traceback.format_exc())
+        return pd.DataFrame()
 # ----------------------------------
 # Load Pitchers
 # ----------------------------------
