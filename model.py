@@ -7,7 +7,7 @@ def predict_home_runs(df_input=None):
 
         from data_loader import load_batter_features, get_today_matchups
 
-        # Optional: load a trained model (commented if not available yet)
+        # Optional: Load trained model
         try:
             import joblib
             model = joblib.load("models/hr_model.pkl")
@@ -19,43 +19,39 @@ def predict_home_runs(df_input=None):
             use_real_model = False
 
         # Load data
-        batters = load_batter_features()
-        matchups = get_today_matchups()
+        batters = load_batter_features()  # Must include a 'team' column (real MLB team)
+        matchups = get_today_matchups()   # From MLB API — real matchups
 
         if batters.empty or matchups.empty:
             print(">>> No data available.")
             return pd.DataFrame({"player": ["No data"], "pitcher": [None]})
 
-        # Simulate team assignment
-        teams = matchups['team'].unique().tolist()
-        if len(teams) < 1:
-            return pd.DataFrame({"player": ["No matchups available"], "pitcher": [None]})
+        # Filter batters to only those whose teams are playing today
+        playing_teams = matchups['team'].unique().tolist()
+        batters = batters[batters['team'].isin(playing_teams)]
 
-        batters = batters.head(20)
-        batters['team'] = np.random.choice(teams, size=len(batters))
+        if batters.empty:
+            print(">>> No batters from teams in today's matchups.")
+            return pd.DataFrame({"player": ["No batters for today's slate"], "pitcher": [None]})
 
-        # Merge with matchups
+        # Merge with matchups to get opposing pitcher
         df = pd.merge(batters, matchups, on='team', how='left')
 
-        # Features to use for model
-        features = ["slg", "iso", "hr"]  # Example — update with your real model's input features
+        # Features used for model or fallback
+        features = ["slg", "iso", "hr"]
 
         if use_real_model and all(f in df.columns for f in features):
-            # Drop rows with missing values in key features
             df_model = df.dropna(subset=features)
             X = df_model[features]
-
-            # Predict HR probability
-            hr_probs = model.predict_proba(X)[:, 1]
-            df.loc[df_model.index, "hr_prob"] = np.round(hr_probs, 3)
+            df.loc[df_model.index, "hr_prob"] = np.round(model.predict_proba(X)[:, 1], 3)
         else:
-            # Fallback mock scoring
             df["hr_prob"] = (
                 0.15 * df["slg"] +
                 0.5 * df["iso"] +
                 0.01 * df["hr"]
             ).clip(0, 1).round(3)
 
+        # Return the columns used in Streamlit app
         return df[['player', 'team', 'pitcher', 'slg', 'iso', 'hr', 'hr_prob']]
 
     except Exception as e:
