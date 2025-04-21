@@ -7,6 +7,8 @@ if st.button("Refresh Predictions"):
     st.write(">>> Getting predictions...")
     try:
         df = predict_home_runs()
+        min_iso = st.slider("Min ISO", 0.1, 0.5, 0.2)
+df_filtered = df_sorted[df_sorted["ISO"] >= min_iso]
         st.write(">>> Done.")
         df_sorted = df_sorted.rename(columns={
     "player": "Player",
