@@ -74,44 +74,51 @@ def load_pitcher_features():
         traceback.print_exc()
         return pd.DataFrame()
 
-# ----------------------------------
-# Scrape Rotowire Matchups
-# ----------------------------------
+import requests
+import pandas as pd
+from datetime import datetime
+
 def get_today_matchups():
     try:
-        print(">>> Scraping Rotowire matchups...")
-        url = "https://www.rotowire.com/baseball/daily-lineups.php"
-        response = requests.get(url)
-        soup = BeautifulSoup(response.text, "html.parser")
+        print(">>> Fetching MLB matchups from statsapi...")
+
+        # Today's date in YYYY-MM-DD format
+        today = datetime.today().strftime('%Y-%m-%d')
+
+        # Get today's MLB schedule
+        url = f"https://statsapi.mlb.com/api/v1/schedule?sportId=1&date={today}"
+        schedule_response = requests.get(url).json()
 
         matchups = []
 
-        teams = soup.find_all("div", class_="lineup is-expected")
-        for team in teams:
-            pitcher_tag = team.find("span", class_="lineup__note")
-            if not pitcher_tag:
-                continue
+        for date_info in schedule_response.get("dates", []):
+            for game in date_info.get("games", []):
+                try:
+                    away_team = game['teams']['away']['team']['name']
+                    home_team = game['teams']['home']['team']['name']
 
-            pitcher_name = (
-                pitcher_tag.text.strip()
-                .replace("Probable Pitcher: ", "")
-                .split(" ")[0:2]
-            )
-            pitcher_name = " ".join(pitcher_name)
+                    away_pitcher = game['teams']['away'].get('probablePitcher', {}).get('fullName')
+                    home_pitcher = game['teams']['home'].get('probablePitcher', {}).get('fullName')
 
-            batters = team.find_all("div", class_="lineup__player")
-            for b in batters:
-                batter_name = b.text.strip().split(" ")[0:2]
-                batter_name = " ".join(batter_name)
-                matchups.append({"player": batter_name, "pitcher": pitcher_name})
+                    if away_pitcher:
+                        matchups.append({
+                            "team": away_team,
+                            "pitcher": away_pitcher
+                        })
+
+                    if home_pitcher:
+                        matchups.append({
+                            "team": home_team,
+                            "pitcher": home_pitcher
+                        })
+
+                except Exception as e:
+                    print(">>> Skipping one game due to error:", e)
 
         matchup_df = pd.DataFrame(matchups)
-        print(">>> Matchups preview:")
-        print(matchup_df.head())
-print(">>> FINAL matchups df shape:", matchup_df.shape)
+        print(">>> Matchups found:", len(matchup_df))
         return matchup_df
 
     except Exception as e:
-        print(">>> ERROR scraping matchups:", e)
-        traceback.print_exc()
-        return pd.DataFrame(columns=["player", "pitcher"])
+        print(">>> ERROR fetching MLB matchups:", e)
+        return pd.DataFrame(columns=["team", "pitcher"])
