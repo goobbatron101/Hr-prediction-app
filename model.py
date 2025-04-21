@@ -4,31 +4,18 @@ def predict_home_runs(df_input=None):
     try:
         print(">>> Running predict_home_runs...")
 
-        from data_loader import load_batter_features, get_today_matchups
-        import numpy as np
+        from data_loader import get_today_matchups
 
-        batters = load_batter_features()
-matchups = get_today_matchups()
-print(">>> Matchups DataFrame:")
-print(matchups.head(10))
+        matchups = get_today_matchups()
 
-        if batters.empty:
-            print(">>> No batters loaded.")
-            return pd.DataFrame({"player": ["No batters found"], "pitcher": [None]})
+        print(">>> Matchups DataFrame:")
+        print(matchups.head(10))
 
         if matchups.empty:
             print(">>> No matchups found.")
-            # Just return batters with a placeholder pitcher
-            return pd.DataFrame({
-                "player": batters["player"].head(),
-                "pitcher": ["TBD"] * len(batters.head())
-            })
+            return pd.DataFrame({"message": ["No matchups returned"]})
 
-        batters['team'] = np.random.choice(matchups['team'].unique(), size=len(batters))
-        df = pd.merge(batters, matchups, on='team', how='left')
-
-        print(">>> Final merged shape:", df.shape)
-        return df[['player', 'pitcher', 'team']].head(10)
+        return matchups[['team', 'pitcher']].head(10)
 
     except Exception as e:
         import traceback
@@ -36,7 +23,6 @@ print(matchups.head(10))
         print(">>> ERROR in predict_home_runs:")
         print(tb)
         return pd.DataFrame({
-            "player": ["Error occurred"],
-            "pitcher": [None],
-            "team": [None]
+            "message": ["Error occurred"],
+            "traceback": [tb]
         })
