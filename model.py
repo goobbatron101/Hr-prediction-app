@@ -8,10 +8,9 @@ def predict_home_runs(df_input=None):
         import numpy as np
 
         batters = load_batter_features()
-        matchups = get_today_matchups()
-
-        print(">>> Batters shape:", batters.shape)
-        print(">>> Matchups shape:", matchups.shape)
+matchups = get_today_matchups()
+print(">>> Matchups DataFrame:")
+print(matchups.head(10))
 
         if batters.empty:
             print(">>> No batters loaded.")
