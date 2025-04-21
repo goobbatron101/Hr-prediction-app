@@ -13,7 +13,16 @@ if st.button("Refresh Predictions"):
         min_iso = st.slider("Minimum ISO", 0.1, 0.6, 0.2)
         min_hr = st.slider("Minimum HR", 0, 30, 5)
         df = df[(df["iso"] >= min_iso) & (df["hr"] >= min_hr)]
+# Assign recommendation tiers based on ISO and HR
+def recommend_tier(row):
+    if row['iso'] >= 0.3 and row['hr'] >= 10:
+        return "Bet"
+    elif row['iso'] >= 0.2 and row['hr'] >= 5:
+        return "Watch"
+    else:
+        return "Fade"
 
+df["Recommendation"] = df.apply(recommend_tier, axis=1)
         # Sort and rename
         df_sorted = df.sort_values(by='hr', ascending=False).reset_index(drop=True)
         df_sorted = df_sorted.rename(columns={
