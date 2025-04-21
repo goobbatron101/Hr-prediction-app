@@ -5,23 +5,26 @@ def predict_home_runs(df_input=None):
         print(">>> Running predict_home_runs...")
 
         from data_loader import load_batter_features, load_pitcher_features, get_today_matchups
+        import numpy as np
 
         batters = load_batter_features()
         pitchers = load_pitcher_features()
         matchups = get_today_matchups()
 
-        # Debug preview
-        print(">>> Batters:", batters[['player']].head())
-        print(">>> Matchups:", matchups.head())
+        print(">>> Batters shape:", batters.shape)
+        print(">>> Matchups shape:", matchups.shape)
 
-        # For now, simulate batter team to match against matchups
-        # You should replace this with real team data later
-        import numpy as np
+        if batters.empty or matchups.empty:
+            print(">>> One of the inputs is empty.")
+            return pd.DataFrame({"player": ["No data"], "pitcher": [None], "team": [None]})
+
+        # Simulate team for now
         batters['team'] = np.random.choice(matchups['team'].unique(), size=len(batters))
 
-        # Merge batters with matchups to assign opposing pitcher by team
+        # Merge with matchups to assign pitcher
         df = pd.merge(batters, matchups, on='team', how='left')
 
+        print(">>> Final merged shape:", df.shape)
         return df[['player', 'team', 'pitcher', 'slg', 'iso', 'hr']]
 
     except Exception as e:
@@ -30,6 +33,10 @@ def predict_home_runs(df_input=None):
         print(">>> ERROR in predict_home_runs:")
         print(tb)
         return pd.DataFrame({
-            "Error": ["Something went wrong"],
-            "Traceback": [tb]
+            "player": ["Error occurred"],
+            "team": [None],
+            "pitcher": [None],
+            "slg": [None],
+            "iso": [None],
+            "hr": [None]
         })
