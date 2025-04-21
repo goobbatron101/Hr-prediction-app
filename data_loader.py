@@ -77,35 +77,29 @@ def load_pitcher_features():
 
 import requests
 import pandas as pd
-from datetime import datetime
+from datetime import datetime, timedelta
 
 def get_today_matchups():
+    print(">>> Fetching MLB matchups from statsapi...")
+
     try:
-        print(">>> Fetching MLB matchups from statsapi...")
+        today = datetime.today()
+        today_str = today.strftime('%Y-%m-%d')
 
+        url = f"https://statsapi.mlb.com/api/v1/schedule?sportId=1&date={today_str}"
+        response = requests.get(url).json()
 
-# Step 1: Try today, fallback to tomorrow if needed
-today = datetime.today()
-today_str = today.strftime('%Y-%m-%d')
-
-url = f"https://statsapi.mlb.com/api/v1/schedule?sportId=1&date={today_str}"
-response = requests.get(url).json()
-
-games = response.get("dates", [])
-if not games:
-    # Fallback to tomorrow
-    tomorrow = (today + timedelta(days=1)).strftime('%Y-%m-%d')
-    print(f">>> No games found for {today_str}, trying {tomorrow}...")
-    url = f"https://statsapi.mlb.com/api/v1/schedule?sportId=1&date={tomorrow}"
-    response = requests.get(url).json()
-
-        # Get today's MLB schedule
-        url = f"https://statsapi.mlb.com/api/v1/schedule?sportId=1&date={today}"
-        schedule_response = requests.get(url).json()
+        games = response.get("dates", [])
+        if not games:
+            # Fallback to tomorrow
+            tomorrow = (today + timedelta(days=1)).strftime('%Y-%m-%d')
+            print(f">>> No games found for {today_str}, trying {tomorrow}...")
+            url = f"https://statsapi.mlb.com/api/v1/schedule?sportId=1&date={tomorrow}"
+            response = requests.get(url).json()
 
         matchups = []
 
-        for date_info in schedule_response.get("dates", []):
+        for date_info in response.get("dates", []):
             for game in date_info.get("games", []):
                 try:
                     away_team = game['teams']['away']['team']['name']
@@ -115,28 +109,24 @@ if not games:
                     home_pitcher = game['teams']['home'].get('probablePitcher', {}).get('fullName')
 
                     if away_pitcher:
-                        matchups.append({
-                            "team": away_team,
-                            "pitcher": away_pitcher
-                        })
-
+                        matchups.append({"team": away_team, "pitcher": away_pitcher})
                     if home_pitcher:
-                        matchups.append({
-                            "team": home_team,
-                            "pitcher": home_pitcher
-                        })
-
-                except Exception as e:
-                    print(">>> Skipping one game due to error:", e)
+                        matchups.append({"team": home_team, "pitcher": home_pitcher})
+                except Exception as inner:
+                    print(">>> Skipping one game due to error:", inner)
 
         matchup_df = pd.DataFrame(matchups)
-        print(">>> Matchups found:", len(matchup_df))
-if matchup_df.empty:
-    print(">>> Using test fallback matchups...")
-    matchup_df = pd.DataFrame([
-        {"team": "Atlanta Braves", "pitcher": "Chris Sale"},
-        {"team": "Los Angeles Dodgers", "pitcher": "Yoshinobu Yamamoto"}
-    ])
+
+        if matchup_df.empty:
+            print(">>> Using test fallback matchups...")
+            matchup_df = pd.DataFrame([
+                {"team": "Atlanta Braves", "pitcher": "Chris Sale"},
+                {"team": "Los Angeles Dodgers", "pitcher": "Yoshinobu Yamamoto"}
+            ])
+
+        print(">>> Matchups preview:")
+        print(matchup_df.head())
+
         return matchup_df
 
     except Exception as e:
