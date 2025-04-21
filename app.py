@@ -48,3 +48,7 @@ df_sorted = df_sorted.rename(columns={
         import traceback
         st.error("Something went wrong.")
         st.text(traceback.format_exc())
+        except Exception as e:
+    import traceback
+    st.error("Something went wrong.")
+    st.text(traceback.format_exc())
