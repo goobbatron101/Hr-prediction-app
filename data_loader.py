@@ -131,6 +131,12 @@ if not games:
 
         matchup_df = pd.DataFrame(matchups)
         print(">>> Matchups found:", len(matchup_df))
+if matchup_df.empty:
+    print(">>> Using test fallback matchups...")
+    matchup_df = pd.DataFrame([
+        {"team": "Atlanta Braves", "pitcher": "Chris Sale"},
+        {"team": "Los Angeles Dodgers", "pitcher": "Yoshinobu Yamamoto"}
+    ])
         return matchup_df
 
     except Exception as e:
