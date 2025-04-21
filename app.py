@@ -11,48 +11,50 @@ if st.button("Refresh Predictions"):
         df = predict_home_runs()
         st.write(">>> Done.")
 
-        # Step 1: Filters
-        min_iso = st.slider("Minimum ISO", 0.1, 0.6, 0.2)
-        min_hr = st.slider("Minimum HR", 0, 30, 5)
-        df = df[(df["iso"] >= min_iso) & (df["hr"] >= min_hr)]
+        # Filters based on xSLG and xHR
+        min_xslg = st.slider("Minimum xSLG", 0.2, 0.9, 0.4)
+        min_xhr = st.slider("Minimum xHR", 0, 10, 1)
 
-        # Step 2: Tier Recommendation
+        df = df[(df["xslg"] >= min_xslg) & (df["xhr"] >= min_xhr)]
+
+        # Tier Recommendation
         def recommend_tier(row):
-            if row['iso'] >= 0.3 and row['hr'] >= 10:
+            if row['xhr'] >= 5 and row['xslg'] >= 0.5:
                 return "Bet"
-            elif row['iso'] >= 0.2 and row['hr'] >= 5:
+            elif row['xhr'] >= 3:
                 return "Watch"
             else:
                 return "Fade"
 
-        df["Recommendation"] = df.apply(recommend_tier, axis=1)
+        df["Tier"] = df.apply(recommend_tier, axis=1)
 
-        # Step 3: Rename columns for display
-        df_sorted = df.sort_values(by='hr', ascending=False).reset_index(drop=True)
+        # Sort and rename for display
+        df_sorted = df.sort_values(by='hr_prob', ascending=False).reset_index(drop=True)
         df_sorted = df_sorted.rename(columns={
             "player": "Player",
             "team": "Team",
             "pitcher": "Opposing Pitcher",
-            "slg": "SLG",
-            "iso": "ISO",
+            "xhr": "xHR",
+            "xslg": "xSLG",
+            "ev": "EV",
+            "la": "LA",
             "hr": "HR",
-            "hr_prob": "HR Probability",
-            "Recommendation": "Tier"
+            "hr_prob": "HR Probability"
         })
 
-        # Step 4: Tier highlighting function
+        # Highlight function for tiers
         def highlight_tier(val):
             color = {
-                "Bet": "#c6f5c6",     # green
-                "Watch": "#fffac8",   # yellow
-                "Fade": "#f5c6c6"     # red
+                "Bet": "#c6f5c6",
+                "Watch": "#fffac8",
+                "Fade": "#f5c6c6"
             }.get(val, "white")
             return f"background-color: {color}"
 
-        # Step 5: Apply styling
+        # Styling
         styled = df_sorted.style\
-            .bar(subset=["SLG", "ISO", "HR Probability"], color="#FFA07A")\
-            .highlight_max(subset=["HR"], color="#90ee90")\
+            .bar(subset=["xHR", "xSLG", "EV", "HR Probability"], color="#ffa07a")\
+            .highlight_max(subset=["HR Probability"], color="#90ee90")\
             .applymap(highlight_tier, subset=["Tier"])\
             .set_properties(**{"text-align": "left"})
 
