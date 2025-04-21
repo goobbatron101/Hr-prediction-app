@@ -38,11 +38,19 @@ if st.button("Refresh Predictions"):
             "Recommendation": "Tier"
         })
 
-        # Style
-        styled = df_sorted.style\
-            .bar(subset=["SLG", "ISO"], color="#FFA07A")\
-            .highlight_max(subset=["HR"], color="#90ee90")\
-            .set_properties(**{"text-align": "left"})
+def highlight_tier(val):
+    color = {
+        "Bet": "#c6f5c6",     # green
+        "Watch": "#fffac8",   # yellow
+        "Fade": "#f5c6c6"     # red
+    }.get(val, "white")
+    return f"background-color: {color}"
+
+styled = df_sorted.style\
+    .bar(subset=["SLG", "ISO"], color="#FFA07A")\
+    .highlight_max(subset=["HR"], color="#90ee90")\
+    .applymap(highlight_tier, subset=["Tier"])\
+    .set_properties(**{"text-align": "left"})
 
         st.write("### Recommended HR Targets")
         st.dataframe(styled, use_container_width=True)
