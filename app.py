@@ -24,15 +24,16 @@ def recommend_tier(row):
 
 df["Recommendation"] = df.apply(recommend_tier, axis=1)
         # Sort and rename
-        df_sorted = df.sort_values(by='hr', ascending=False).reset_index(drop=True)
-        df_sorted = df_sorted.rename(columns={
-            "player": "Player",
-            "team": "Team",
-            "pitcher": "Opposing Pitcher",
-            "slg": "SLG",
-            "iso": "ISO",
-            "hr": "HR"
-        })
+df_sorted = df.sort_values(by='hr', ascending=False).reset_index(drop=True)
+df_sorted = df_sorted.rename(columns={
+    "player": "Player",
+    "team": "Team",
+    "pitcher": "Opposing Pitcher",
+    "slg": "SLG",
+    "iso": "ISO",
+    "hr": "HR",
+    "Recommendation": "Tier"
+})
 
         # Style
         styled = df_sorted.style\
