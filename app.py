@@ -8,6 +8,14 @@ if st.button("Refresh Predictions"):
     try:
         df = predict_home_runs()
         st.write(">>> Done.")
+        df_sorted = df_sorted.rename(columns={
+    "player": "Player",
+    "team": "Team",
+    "pitcher": "Opposing Pitcher",
+    "slg": "SLG",
+    "iso": "ISO",
+    "hr": "HR"
+})
         # Sort by slugging or HR
 df_sorted = df.sort_values(by='hr', ascending=False).reset_index(drop=True)
 
