@@ -82,8 +82,22 @@ def get_today_matchups():
     try:
         print(">>> Fetching MLB matchups from statsapi...")
 
-        # Today's date in YYYY-MM-DD format
-        today = datetime.today().strftime('%Y-%m-%d')
+from datetime import datetime, timedelta
+
+# Step 1: Try today, fallback to tomorrow if needed
+today = datetime.today()
+today_str = today.strftime('%Y-%m-%d')
+
+url = f"https://statsapi.mlb.com/api/v1/schedule?sportId=1&date={today_str}"
+response = requests.get(url).json()
+
+games = response.get("dates", [])
+if not games:
+    # Fallback to tomorrow
+    tomorrow = (today + timedelta(days=1)).strftime('%Y-%m-%d')
+    print(f">>> No games found for {today_str}, trying {tomorrow}...")
+    url = f"https://statsapi.mlb.com/api/v1/schedule?sportId=1&date={tomorrow}"
+    response = requests.get(url).json()
 
         # Get today's MLB schedule
         url = f"https://statsapi.mlb.com/api/v1/schedule?sportId=1&date={today}"
