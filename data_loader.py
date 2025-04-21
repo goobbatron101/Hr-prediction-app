@@ -83,7 +83,6 @@ def get_today_matchups():
     try:
         print(">>> Fetching MLB matchups from statsapi...")
 
-from datetime import datetime, timedelta
 
 # Step 1: Try today, fallback to tomorrow if needed
 today = datetime.today()
